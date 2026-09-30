@@ -27,7 +27,7 @@ Le projet met en œuvre les briques fondamentales d'une architecture microservic
 
 ## 🏗️ Architecture Globale
 
-![Architecture de l'application](./screenshots/architecture.png)
+![Architecture de l'application](https://raw.githubusercontent.com/kawtar-khallouf/micro-services-app/main/screenshots/architecture.png)
 
 ### Table des Composants et Ports
 
