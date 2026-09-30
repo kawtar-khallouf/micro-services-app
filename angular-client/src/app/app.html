@@ -1,0 +1,54 @@
+<header class="topbar">
+  <div><span class="eyebrow">Spring Cloud</span><h1>Microservices Console</h1></div>
+  <button class="secondary" (click)="refresh()">Actualiser</button>
+</header>
+
+<main>
+  <nav class="tabs">
+    @for (tab of ['dashboard', 'customers', 'products', 'bills']; track tab) {
+      <button [class.active]="activeTab === tab" (click)="activeTab = tab">
+        {{ tab === 'dashboard' ? 'Vue d’ensemble' : tab === 'customers' ? 'Clients' : tab === 'products' ? 'Produits' : 'Factures' }}
+      </button>
+    }
+  </nav>
+
+  @if (error()) { <div class="alert">{{ error() }}</div> }
+  @if (loading()) { <p class="muted">Chargement des données…</p> }
+
+  @if (activeTab === 'dashboard') {
+    <section class="hero">
+      <div><span class="eyebrow">Tableau de bord</span><h2>Votre architecture en un coup d’œil</h2><p>Gérez les données exposées par Customer, Inventory et Billing via le gateway.</p></div>
+      <div class="stats"><div><strong>{{ customers().length }}</strong><span>Clients</span></div><div><strong>{{ products().length }}</strong><span>Produits</span></div><div><strong>{{ bills().length }}</strong><span>Factures</span></div></div>
+    </section>
+  }
+
+  @if (activeTab === 'customers') {
+    <section class="content-grid">
+      <form class="card form-card" (ngSubmit)="saveCustomer()">
+        <h2>{{ editingCustomerId ? 'Modifier le client' : 'Nouveau client' }}</h2>
+        <label>Nom<input name="customerName" [(ngModel)]="customerDraft.name" required></label>
+        <label>Email<input name="customerEmail" type="email" [(ngModel)]="customerDraft.email" required></label>
+        <div class="actions"><button class="primary" type="submit">Enregistrer</button><button class="secondary" type="button" (click)="resetCustomer()">Annuler</button></div>
+      </form>
+      <section class="card"><h2>Clients</h2><table><thead><tr><th>Nom</th><th>Email</th><th></th></tr></thead><tbody>      @for (customer of customers(); track customer.id ?? $index) {<tr><td>{{ customer.name }}</td><td>{{ customer.email }}</td><td class="row-actions"><button type="button" (click)="editCustomer(customer)">Modifier</button><button type="button" class="danger" (click)="deleteCustomer(customer.id)">Supprimer</button></td></tr>}</tbody></table></section>
+    </section>
+  }
+
+  @if (activeTab === 'products') {
+    <section class="content-grid">
+      <form class="card form-card" (ngSubmit)="saveProduct()">
+        <h2>{{ editingProductId ? 'Modifier le produit' : 'Nouveau produit' }}</h2>
+        <label>Nom<input name="productName" [(ngModel)]="productDraft.name" required></label>
+        <label>Prix<input name="productPrice" type="number" min="0" [(ngModel)]="productDraft.price" required></label>
+        <label>Stock<input name="productQuantity" type="number" min="0" [(ngModel)]="productDraft.quantity" required></label>
+        <div class="actions"><button class="primary" type="submit">Enregistrer</button><button class="secondary" type="button" (click)="resetProduct()">Annuler</button></div>
+      </form>
+      <section class="card"><h2>Produits</h2><table><thead><tr><th>Nom</th><th>Prix</th><th>Stock</th><th></th></tr></thead><tbody>      @for (product of products(); track product.id ?? $index) {<tr><td>{{ product.name }}</td><td>{{ product.price | number:'1.2-2' }}</td><td>{{ product.quantity }}</td><td class="row-actions"><button type="button" (click)="editProduct(product)">Modifier</button><button type="button" class="danger" (click)="deleteProduct(product.id)">Supprimer</button></td></tr>}</tbody></table></section>
+    </section>
+  }
+
+  @if (activeTab === 'bills') {
+    <section class="card"><h2>Factures</h2><p class="muted">Sélectionnez une facture pour charger son détail enrichi.</p><table><thead><tr><th>#</th><th>Date</th><th>Client</th><th></th></tr></thead><tbody>    @for (bill of bills(); track bill.id ?? $index) {<tr><td>{{ bill.id }}</td><td>{{ bill.billingDate | date:'medium' }}</td><td>{{ bill.customer?.name || bill.customerId }}</td><td><button type="button" (click)="showBill(bill.id)">Détail</button></td></tr>}</tbody></table></section>
+    @if (selectedBill(); as bill) {<section class="card detail"><h2>Facture #{{ bill.id }}</h2><p><b>Client :</b> {{ bill.customer?.name }} · {{ bill.customer?.email }}</p><div class="items">    @for (item of bill.productItems; track item.id ?? $index) {<div><span>{{ item.product?.name || 'Produit #' + item.productId }}</span><span>{{ item.quantity }} × {{ item.price | number:'1.2-2' }}</span></div>}</div></section>}
+  }
+</main>
